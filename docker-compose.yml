@@ -1,0 +1,67 @@
+services:
+  # SERVICE: DATABASE
+  # Role: Persistent storage for currency rates and historical data.
+  db:
+    image: postgres:16
+    restart: always
+    container_name: nbp_db
+    # Security: Credentials injected via .env.
+    env_file:
+      - .env
+    # Persistence: Named volume ensures data survival across container restarts.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Network: Expose 5432 to host for external inspection tools (DBeaver/pgAdmin).
+    ports:
+      - "5432:5432"
+    # Orchestration: Healthcheck prevents 'backend' from crashing on startup due to DB latency.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # SERVICE: BACKEND
+  # Role: REST API Gateway & Business Logic.
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nbp_backend
+    # Network: Maps host 8000 to container 8000 (Uvicorn default).
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Connection String Construction:
+      # Internal Docker DNS resolves 'db' to the database container IP.
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASSWORD}
+    # Dependency Management: Wait for DB to be fully operational before starting Uvicorn.
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # SERVICE: FRONTEND
+  # Role: Client-side application served via Nginx (Production Build).
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nbp_frontend
+    # Network: Maps user-requested port 4200 to Nginx standard web port 80.
+    ports:
+      - "4200:80"
+    # Orchestration: Ensures frontend container starts, though browser-side logic
+    # handles the actual API connection asynchronously.
+    depends_on:
+      - backend
+
+# VOLUMES: Data persistence strategy.
+volumes:
+  postgres_data:
+    driver: local

@@ -1,12 +1,17 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  standalone: true,
+  imports: [RouterOutlet], // Tylko RouterOutlet jest tu potrzebny
+  template: `<router-outlet></router-outlet>`, // Inline template dla prostoty
+  styles: [`
+    :host {
+      display: block;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+  `]
 })
-export class App {
-  protected readonly title = signal('frontend');
-}
+export class App {}

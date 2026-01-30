@@ -1,0 +1,66 @@
+.results-container {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.no-data {
+  text-align: center;
+  color: #666;
+  padding: 40px;
+  font-style: italic;
+}
+
+.year-header {
+  border-bottom: 2px solid #333;
+  padding-bottom: 5px;
+  margin-top: 30px;
+  color: #2c3e50;
+}
+
+.quarter-section {
+  margin-left: 20px;
+  border-left: 3px solid #eee;
+  padding-left: 15px;
+  margin-top: 20px;
+}
+
+.quarter-header {
+  color: #555;
+  font-size: 1.1em;
+  text-transform: uppercase;
+}
+
+.month-section {
+  margin-left: 20px;
+  margin-top: 15px;
+}
+
+.month-header {
+  color: #1976d2;
+  margin-bottom: 10px;
+}
+
+.rates-table {
+  width: 100%;
+  max-width: 400px;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.rates-table th, .rates-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.rates-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.value-cell {
+  font-family: monospace;
+  font-weight: bold;
+}

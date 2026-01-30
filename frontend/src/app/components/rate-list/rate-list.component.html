@@ -1,0 +1,43 @@
+<div class="results-container">
+  
+  @if (data.length === 0) {
+    <div class="no-data">
+      Brak danych do wyświetlenia. Wybierz parametry i kliknij "Pobierz kursy".
+    </div>
+  }
+
+  @for (yearNode of data; track yearNode.year) {
+    <div class="year-section">
+      <h2 class="year-header">{{ yearNode.year }}</h2>
+
+      @for (quarterNode of yearNode.quarters; track quarterNode.quarterName) {
+        <div class="quarter-section">
+          <h3 class="quarter-header">{{ quarterNode.quarterName }}</h3>
+
+          @for (monthNode of quarterNode.months; track monthNode.monthIndex) {
+            <div class="month-section">
+              <h4 class="month-header">{{ monthNode.monthName }}</h4>
+
+              <table class="rates-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Kurs (PLN)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (rate of monthNode.rates; track rate.date) {
+                    <tr>
+                      <td>{{ rate.date }}</td>
+                      <td class="value-cell">{{ rate.value }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

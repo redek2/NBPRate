@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import text
 from app.database import engine
 from app.routers import currencies, rates
@@ -25,15 +26,26 @@ async def lifespan(app: FastAPI):
             await conn.execute(text("SELECT 1"))
         logger.info("Database connection established successfully.")
     except Exception as e:
-        logger.critical(f"Database connection failed: {e}")
-        # In a real scenario, we might want to stop the app here
-    
+        logger.critical(f"Database connection failed: {e}")    
     yield
     
     await engine.dispose()
     logger.info("Database connection closed.")
 
+origins = [
+    "http://localhost:4200",
+    "http://127.0.0.1:4200",
+]
+
 app = FastAPI(title="NBPRate API", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 2. Global Exception Handler
 # Catches any unhandled exceptions to prevent stack traces from leaking to the client.

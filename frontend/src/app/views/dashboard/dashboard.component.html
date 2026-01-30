@@ -1,0 +1,25 @@
+<div class="dashboard-container">
+  <header>
+    <h1>NBPRate - Analiza Kursów Walut</h1>
+  </header>
+
+  <app-rate-selector (search)="onSearch($event)"></app-rate-selector>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Pobieranie i przetwarzanie danych z NBP...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-state">
+      <h3>Wystąpił błąd</h3>
+      <p>{{ errorMessage }}</p>
+    </div>
+  }
+
+  @if (!isLoading && !errorMessage) {
+    <app-rate-list [data]="treeData"></app-rate-list>
+  }
+</div>

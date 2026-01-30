@@ -1,0 +1,43 @@
+<div class="selector-container">
+  <h3>Parametry wyszukiwania</h3>
+  
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    
+    <div class="form-group">
+      <label for="currency">Waluta:</label>
+      <select id="currency" formControlName="currency">
+        <option value="" disabled>Wybierz walutę</option>
+        @for (curr of currencies; track curr.id) {
+          <option [value]="curr.code">{{ curr.code }} - {{ curr.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="dateFrom">Data od:</label>
+      <input type="date" id="dateFrom" formControlName="dateFrom">
+    </div>
+
+    <div class="form-group">
+      <label for="dateTo">Data do:</label>
+      <input type="date" id="dateTo" formControlName="dateTo">
+    </div>
+
+    @if (!isDateRangeValid && form.touched) {
+      <div class="error-msg">Data "Do" musi być późniejsza niż data "Od".</div>
+    }
+
+    @if (errorMessage) {
+      <div class="error-msg server-error">{{ errorMessage }}</div>
+    }
+
+    <button type="submit" [disabled]="!form.valid || !isDateRangeValid || isLoading">
+      @if (isLoading) {
+        Ładowanie...
+      } @else {
+        Pobierz kursy
+      }
+    </button>
+
+  </form>
+</div>

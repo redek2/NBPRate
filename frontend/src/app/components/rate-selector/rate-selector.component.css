@@ -1,0 +1,57 @@
+.selector-container {
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+}
+
+form {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end; /* Wyrównanie inputów i przycisku do dołu */
+  flex-wrap: wrap;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-size: 0.9em;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+input, select, button {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+button {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  min-width: 120px;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-msg {
+  color: #d32f2f;
+  font-size: 0.85em;
+  margin-top: 5px;
+  width: 100%;
+}
+
+.server-error {
+  font-weight: bold;
+}

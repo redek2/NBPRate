@@ -1,61 +1,136 @@
 # NBPRate
 
-Application for retrieving and visualizing currency exchange rates from the National Bank of Poland (NBP) API. The system allows users to view data broken down by years, quarters, months, and days. The project emphasizes strict architectural separation, containerization, and Behavior-Driven Development (BDD).
+**NBPRate** to zaawansowana aplikacja typu *Full-Stack* służąca do pobierania, synchronizacji i wizualizacji kursów walut z API Narodowego Banku Polskiego (NBP). System charakteryzuje się architekturą mikroserwisową, pełną konteneryzacją oraz zoptymalizowanym mechanizmem zarządzania danymi ("Smart Gap Detection").
 
-## Technology Stack
+Aplikacja umożliwia użytkownikom analizę danych historycznych w układzie hierarchicznym (Rok → Kwartał → Miesiąc → Dzień) z wykorzystaniem interfejsu reaktywnego.
 
-* **Frontend:** Angular (served via Nginx)
-* **Backend:** Python 3.13 + FastAPI
-* **Database:** PostgreSQL 16
-* **Infrastructure:** Docker & Docker Compose
-* **Testing:** Pytest (Backend), Jasmine/Karma (Frontend)
+---
 
-## Prerequisites
+## Kluczowe Funkcjonalności
 
-* Docker Desktop (or Docker Engine + Docker Compose Plugin)
+* **Smart Gap Detection:** Autorski algorytm backendowy, który inteligentnie wykrywa luki w danych lokalnych. System pobiera z API NBP tylko brakujące zakresy dat, minimalizując ruch sieciowy i ryzyko rate-limitów.
+* **Wydajny Cache (Persistent Storage):** Pobrane kursy są trwale zapisywane w bazie PostgreSQL, zapewniając błyskawiczny dostęp przy kolejnych zapytaniach (Warm Cache).
+* **Reaktywny Frontend:** Zbudowany w **Angular 19** (Standalone Components), wykorzystujący Reactive Forms oraz RxJS do zarządzania stanem i strumieniami danych.
+* **Architektura "Production-Ready":**
+    * Backend: Asynchroniczny **FastAPI** z **SQLModel**.
+    * Frontend: Serwowany przez lekki serwer **Nginx** (Alpine Linux).
+    * Baza Danych: Zoptymalizowany **PostgreSQL 16**.
+* **Bezpieczeństwo i Integralność:** Pełna walidacja typów danych (Pydantic/TypeScript), constrainty bazodanowe (`UNIQUE`) oraz izolacja sekretów w plikach `.env`.
+
+---
+
+## Stack Technologiczny
+
+### Backend
+* **Język:** Python 3.13+
+* **Framework:** FastAPI
+* **ORM/Database:** SQLModel (SQLAlchemy Core + Pydantic v2)
+* **Driver:** AsyncPG (Asynchroniczny driver PostgreSQL)
+* **Migracje:** Alembic
+* **Testy:** Pytest (Testy integracyjne i jednostkowe)
+
+### Frontend
+* **Framework:** Angular 19
+* **Serwer HTTP:** Nginx (w kontenerze produkcyjnym)
+* **Stylizacja:** CSS3 / HTML5
+* **Architektura:** Container/Presentational Components Pattern
+
+### DevOps & Infrastruktura
+* **Konteneryzacja:** Docker & Docker Compose
+* **Baza Danych:** PostgreSQL 16
+* **Healthchecks:** Automatyczna weryfikacja gotowości usług (`pg_isready`)
+
+---
+
+## Architektura Systemu
+
+Aplikacja składa się z trzech izolowanych usług orkiestrowanych przez Docker Compose:
+
+1.  **`nbp_db` (PostgreSQL 16):**
+    * Przechowuje relacyjne dane o walutach i kursach.
+    * Wykorzystuje wolumen `postgres_data` do zapewnienia trwałości danych po restarcie kontenerów.
+2.  **`nbp_backend` (FastAPI):**
+    * Wystawia REST API (OpenAPI/Swagger).
+    * Zarządza logiką biznesową i synchronizacją z NBP.
+    * Komunikuje się z bazą danych wewnątrz sieci Docker.
+3.  **`nbp_frontend` (Angular + Nginx):**
+    * Zbudowany w procesie *Multi-stage build*.
+    * Nginx serwuje statyczne pliki aplikacji i obsługuje routing.
+
+---
+
+## Uruchomienie Projektu
+
+### Wymagania wstępne
+* Docker Desktop (lub Docker Engine + Docker Compose)
 * Git
 
-## Project Architecture
+### Instrukcja krok po kroku
 
-The application is composed of three isolated containers orchestrated via Docker Compose:
+1.  **Sklonuj repozytorium:**
+    ```bash
+    git clone <repository_url>
+    cd NBPRate
+    ```
 
-1.  **db**: PostgreSQL 16 database with persistent volume storage.
-2.  **backend**: FastAPI application running on Uvicorn.
-3.  **frontend**: Angular application built for production and served by Nginx.
+2.  **Konfiguracja środowiska:**
+    Utwórz plik `.env` w głównym katalogu projektu. Użyj poniższego szablonu (zmień hasło na własne):
+    ```env
+    POSTGRES_DB=nbp_db
+    POSTGRES_USER=nbp_user
+    POSTGRES_PASSWORD=twoje_bezpieczne_haslo
+    ```
 
-## Getting Started
+3.  **Uruchomienie aplikacji:**
+    Zbuduj i uruchom kontenery w trybie deweloperskim (z podglądem logów):
+    ```bash
+    docker-compose up --build
+    ```
+    *Aby uruchomić w tle, dodaj flagę `-d`.*
 
-### 1. Clone the repository
-```bash
-git clone <repository_url>
-cd NBPRate
-```
-### 2. Environment Configuration
-Create a .env file in the root directory. This file is excluded from version control for security reasons. Define the following variables:
-```
-POSTGRES_DB=nbp_db
-POSTGRES_USER=nbp_user
-POSTGRES_PASSWORD=your_secure_password
-```
-### 3. Build and run
-Start the entire infrastructure using Docker Compose:
-```
-docker-compose up --build
-```
-To run in detached mode:
-```
-docker-compose up -d
-```
-### 4. Stopping the Application
-To stop containers and remove network artifacts:
-```
-docker-compose down
-```
+4.  **Zatrzymanie aplikacji:**
+    ```bash
+    docker-compose down
+    ```
 
-## Access Points
-| Service | URL / Port | Description |
+---
+
+## Punkty Dostępu (Access Points)
+
+Po uruchomieniu aplikacja jest dostępna pod następującymi adresami:
+
+| Usługa | Adres URL | Opis |
 | :--- | :--- | :--- |
-| Frontend | http://localhost:4200 | Main User Interface |
-| Backend API | http://localhost:8000 | API Root |
-| API Documentation | http://localhost:8000/docs | Swagger UI (OpenAPI) |
-| Database | localhost:5432 | Direct PostgreSQL access (Host mapping) |
+| **Frontend** | `http://localhost:4200` | Główny interfejs użytkownika |
+| **API Docs (Swagger)** | `http://localhost:8000/docs` | Interaktywna dokumentacja API |
+| **API Docs (ReDoc)** | `http://localhost:8000/redoc` | Alternatywna dokumentacja API |
+| **Baza Danych** | `localhost:5432` | Bezpośredni dostęp do PostgreSQL (wymaga klienta SQL) |
+
+---
+
+## Development & Testowanie
+
+### Backend
+Uruchomienie testów regresyjnych (Pytest) wewnątrz kontenera:
+```bash
+docker exec -it nbp_backend pytest -v
+```
+
+### Baza danych
+Bezpośredni dostęp do powłoki SQL wewnątrz kontenera
+```
+docker exec -it nbp_db psql -U nbp_user -d nbp_db
+```
+## Struktura projektu
+```
+NBPRate/
+├── backend/            # Kod źródłowy API (Python/FastAPI)
+│   ├── app/            # Logika aplikacji (Modele, Serwisy, Routery)
+│   ├── tests/          # Testy jednostkowe i integracyjne
+│   └── alembic/        # Migracje bazy danych
+├── frontend/           # Kod źródłowy UI (Angular)
+│   ├── src/            # Komponenty, Serwisy, Modele
+│   └── Dockerfile      # Konfiguracja multi-stage build (Node -> Nginx)
+├── docker-compose.yml  # Orkiestracja usług
+└── README.md           # Dokumentacja
+```
